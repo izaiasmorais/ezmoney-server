@@ -32,7 +32,7 @@ app.get("/clients", async (request, response) => {
   return response.json(clients);
 });
 
-// =====================================================================
+// TRANSACTIONS
 
 app.post("/clients/:id/transactions", async (request, response) => {
   const clientId = request.params.id;
@@ -52,6 +52,27 @@ app.post("/clients/:id/transactions", async (request, response) => {
   return response.status(201).json(transaction);
 });
 
-// =====================================================================
+app.get("/clients/:id/transactions", async (request, response) => {
+  const clientId = request.params.id;
+
+  const transactions = await prisma.transaction.findMany({
+    select: {
+      id: true,
+      title: true,
+      createAt: true,
+      type: true,
+      price: true,
+      description: true,
+    },
+    where: {
+      clientId,
+    },
+    orderBy: {
+      createAt: "desc",
+    },
+  });
+
+  return response.json(transactions);
+});
 
 app.listen(3333);
