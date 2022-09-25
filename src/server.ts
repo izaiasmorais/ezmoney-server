@@ -32,7 +32,7 @@ app.get("/clients", async (request, response) => {
   return response.json(clients);
 });
 
-// TRANSACTIONS
+// HANDLE TRANSACTIONS
 
 app.post("/clients/:id/transactions", async (request, response) => {
   const clientId = request.params.id;
