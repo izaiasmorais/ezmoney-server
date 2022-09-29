@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { PrismaClient, Transaction } from "@prisma/client";
+import { PrismaClient, Transaction, Invoice } from "@prisma/client";
 
 const app = express();
 
@@ -9,23 +9,33 @@ app.use(cors());
 
 const prisma = new PrismaClient();
 
+// HANDLE CLIENTS
+
 app.post("/clients", async (request, response) => {
   const body: { name: string; email: string } = request.body;
 
-  const transactions = await prisma.client.create({
+  await prisma.client.create({
     data: {
       name: body.name,
       email: body.email,
     },
   });
 
-  return response.json(transactions);
+  const clients = await prisma.client.findMany({
+    include: {
+      transactions: true,
+      invoices: true,
+    },
+  });
+
+  return response.json(clients);
 });
 
 app.get("/clients", async (request, response) => {
   const clients = await prisma.client.findMany({
     include: {
       transactions: true,
+      invoices: true,
     },
   });
 
@@ -68,11 +78,52 @@ app.get("/clients/:id/transactions", async (request, response) => {
       clientId,
     },
     orderBy: {
-      createAt: "desc",
+      createAt: "asc",
     },
   });
 
   return response.json(transactions);
+});
+
+// HANDLE INVOICES
+
+app.post("/clients/:id/invoices", async (request, response) => {
+  const clientId = request.params.id;
+  const body: Omit<Invoice, "id"> = request.body;
+
+  const invoice = await prisma.invoice.create({
+    data: {
+      clientId,
+      title: body.title,
+      status: body.status,
+      price: body.price,
+      dueDate: new Date(body.dueDate),
+    },
+  });
+
+  return response.status(201).json(invoice);
+});
+
+app.get("/clients/:id/invoices", async (request, response) => {
+  const clientId = request.params.id;
+
+  const invoices = await prisma.invoice.findMany({
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      price: true,
+      dueDate: true,
+    },
+    where: {
+      clientId,
+    },
+    orderBy: {
+      dueDate: "asc",
+    },
+  });
+
+  return response.json(invoices);
 });
 
 app.listen(3333);

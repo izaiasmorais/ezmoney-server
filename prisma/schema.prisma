@@ -8,10 +8,12 @@ datasource db {
 }
 
 model Client {
-  id          String        @id @default(uuid())
-  name        String
-  email       String
+  id    String @id @default(uuid())
+  name  String
+  email String
+
   transactions Transaction[]
+  invoices     Invoice[]
 }
 
 model Transaction {
@@ -29,7 +31,10 @@ model Transaction {
 model Invoice {
   id      String @id @default(uuid())
   title   String
-  dueDate String
   status  String
-  price   String
+  price   Int
+  dueDate DateTime
+
+  client   Client @relation(fields: [clientId], references: [id])
+  clientId String
 }
