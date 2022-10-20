@@ -24,7 +24,7 @@ model Transaction {
   id          String   @id @default(uuid())
   title       String
   description String
-  price       String
+  price       Float
   type        String
   createAt    DateTime @default(now())
 
@@ -36,7 +36,7 @@ model Invoice {
   id      String @id @default(uuid())
   title   String
   status  String
-  price       String
+  price   Float
   dueDate DateTime
 
   client   Client @relation(fields: [clientId], references: [id])
